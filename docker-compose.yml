@@ -1,0 +1,57 @@
+x-pipeline-common: &pipeline-common
+  ports:
+    - "8000:8000"
+    - "8501:8501"
+  volumes:
+    - ./data:/app/data
+    - ./models:/app/models
+    - ./runs:/app/runs
+  environment:
+    - API_BASE_URL=http://localhost:8000
+    - LABEL_STUDIO_EXTERNAL_URL=http://localhost:8080
+    - LABEL_STUDIO_INTERNAL_URL=http://label-studio:8080
+  shm_size: "2gb"
+
+services:
+  label-studio:
+    image: heartexlabs/label-studio:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/label-studio/data
+    environment:
+      - LOCAL_FILES_SERVING_ENABLED=true
+      - LOCAL_FILES_DOCUMENT_ROOT=/label-studio/data
+
+  pipeline-cpu:
+    <<: *pipeline-common
+    profiles: ["cpu"]
+    build:
+      context: .
+      args:
+        COMPUTE_MODE: cpu
+    environment:
+      - COMPUTE_MODE=cpu
+      - API_BASE_URL=http://localhost:8000
+      - LABEL_STUDIO_EXTERNAL_URL=http://localhost:8080
+      - LABEL_STUDIO_INTERNAL_URL=http://label-studio:8080
+
+  pipeline-gpu:
+    <<: *pipeline-common
+    profiles: ["gpu"]
+    build:
+      context: .
+      args:
+        COMPUTE_MODE: gpu
+    environment:
+      - COMPUTE_MODE=gpu
+      - API_BASE_URL=http://localhost:8000
+      - LABEL_STUDIO_EXTERNAL_URL=http://localhost:8080
+      - LABEL_STUDIO_INTERNAL_URL=http://label-studio:8080
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
