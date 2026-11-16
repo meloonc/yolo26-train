@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM docker.m.daocloud.io/python:3.11-slim
 
 ARG COMPUTE_MODE=cpu
 ENV COMPUTE_MODE=${COMPUTE_MODE} \
