@@ -14,7 +14,7 @@ x-pipeline-common: &pipeline-common
 
 services:
   label-studio:
-    image: heartexlabs/label-studio:latest
+    image: docker.m.daocloud.io/heartexlabs/label-studio:latest
     ports:
       - "8080:8080"
     volumes:
